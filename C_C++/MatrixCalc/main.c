@@ -12,6 +12,16 @@ typedef struct P_Matrix
     int Ysize;
 } Matrix;
 
+typedef struct P_reMatrix
+{
+    double ***matrix;
+    double ***coefic;
+    int coefic_Size;
+    int Xsize;
+    int Ysize;
+} VariableMatrix;
+
+
 void free_Matrix(Matrix* freed)
 {
     if(freed != NULL)
@@ -48,6 +58,75 @@ double** alloc_Matrix(int Xsize, int Ysize)
     }
     return out;
 }
+
+void free_VarMatrix(VariableMatrix* freed)
+{
+    if(freed != NULL)
+    {
+        if(freed->matrix != NULL)
+        {
+            for(int i = 0; i < freed->Ysize; i++)
+            {
+                if(freed->matrix[i] != NULL)
+                {
+                    for(int j = 0; j < freed->Xsize; j++)
+                    {
+                        if(freed->matrix[i][j] != NULL)
+                            free(freed->matrix[i][j]);
+                    }
+                    free(freed->matrix[i]);
+                }
+            }
+            free(freed->matrix);
+        }
+        if(freed->coefic != NULL)
+        {
+            for(int i = 0; i < freed->Ysize; i++)
+            {
+                if(freed->coefic[i] != NULL)
+                {
+                    for(int j = 0; j < freed->Xsize; j++)
+                    {
+                        if(freed->coefic[i][j] != NULL)
+                            free(freed->coefic[i][j]);
+                    }
+                    free(freed->coefic[i]);
+                }
+            }
+            free(freed->coefic);
+        }
+        free(freed);
+    }
+    return;
+}
+
+VariableMatrix* alloc_VarMatrix(int Xsize, int Ysize, int Csize)
+{
+    VariableMatrix *output = (VariableMatrix *) malloc(sizeof(VariableMatrix));
+    output->Xsize = Xsize, output->Ysize = Ysize, output->coefic_Size = Csize;
+
+    output->matrix = (double ***) malloc(Ysize * sizeof(double**));
+    if(output->matrix == NULL)
+        return NULL;
+    output->coefic = (double ***) malloc(Ysize * sizeof(double**));
+    if(output->coefic == NULL)
+    { free_VarMatrix(output); return NULL; }
+
+    for(int i = 0; i < Ysize; i++)
+    {
+        output->matrix[i] = (double **) malloc(Xsize * sizeof(double *));
+        if(output->matrix[i] == NULL)
+        { free_VarMatrix(output); return NULL; }
+        for(int j = 0; j < Xsize; i++)
+        {
+            output->matrix[i][j] = (double *) malloc(Csize * sizeof(double));
+            if(output->matrix[i][j] == NULL)
+            { free_VarMatrix(output); return NULL; }
+        }
+    }
+    return output->matrix ;
+}
+
 
 void show_Matrix(Matrix* show)
 {
@@ -193,6 +272,48 @@ Matrix* multiply_Matrixes(Matrix *A, Matrix *B)
     return res;
 }
 
+Matrix* getInverse_Matrix(Matrix *A)
+{
+    if(A->Xsize != A->Ysize)
+    {
+        printf("# A matriz nao possui um tamanho compativel! \n");
+        return NULL;
+    }
+    
+    Matrix* identity = alloc_Matrix(A->Xsize, A->Ysize);
+    if(identity == NULL)
+    {
+        printf("# Incapaz de incializar matriz identidade! \n");
+        return NULL;
+    }
+    for(int i = 0; i < identity->Xsize; i++)
+    {
+        for(int j = 0; j < identity->Xsize; j++)
+        {
+            if(i == j)
+                identity->matrix[i][j] = 1;
+            else
+                identity->matrix[i][j] = 0;
+        }
+    }
+
+    VariableMatrix* result = alloc_VarMatrix(A->Xsize, A->Ysize, A->Xsize);
+    if(result == NULL)
+    {
+        printf("# Incapaz de incializar matriz inversa! \n");
+        return NULL;
+    }
+    for(int i = 0; i < result->Xsize; i++)
+    {
+        for(int j = 0; j < result->Xsize; j++)
+        {
+            for(int k = 0; k < result->coefic_Size; k++)
+                result
+        }
+    }
+
+}
+
 int main(int argc, char **argv)
 {
     char command[COMMAND_SIZE], action;
@@ -208,6 +329,7 @@ int main(int argc, char **argv)
         printf("<[C] Multiplicar Matriz 1 X Numero N> \n");
         printf("<[E] Multiplicar Matriz 1 x Matriz 2> \n");
         printf("<[D] Multiplicar Matriz 2 x Matriz 1> \n");
+        printf("<[Z] Obter Matriz Inversa Da Matriz 1 > \n");
         printf("<[X] Sair> \n");
         fflush(stdin);
         scanf("%c", &action);
@@ -234,33 +356,38 @@ int main(int argc, char **argv)
                 break;
             case 'e':
             case 'E':
-                free_Matrix(RES_Matrix);
                 RES_Matrix = multiply_Matrixes(A_Matrix, B_Matrix);
                 show_Matrix(RES_Matrix);
                 break;
             case 'd':
             case 'D':
-                free_Matrix(RES_Matrix);
                 RES_Matrix = multiply_Matrixes(A_Matrix, B_Matrix);
                 show_Matrix(RES_Matrix);
                 break;
             case 'c':
             case 'C':
-                free_Matrix(RES_Matrix);
                 RES_Matrix = multiply_MatrixByN(A_Matrix);
+                show_Matrix(RES_Matrix);
+                break;
+            case 'z':
+            case 'Z':
+                RES_Matrix = getInverse_Matrix(A_Matrix);
                 show_Matrix(RES_Matrix);
                 break;
             case 'x':
             case 'X':
+                if(RES_Matrix != NULL)
+                    free_Matrix(RES_Matrix);
                 free_Matrix(A_Matrix);
                 free_Matrix(B_Matrix);
-                free_Matrix(RES_Matrix);
                 printf("$ Saindo... \n");
                 return 0;
             default:
                 printf("$ Comando Invalido! \n");
                 break;
         }
+        if(RES_Matrix != NULL)
+            free_Matrix(RES_Matrix);
     } while (1);
 
     return 1;
