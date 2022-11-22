@@ -43,49 +43,6 @@ Matrix* get_Matrix()
     return out;
 }
 
-Matrix* getInverse_Matrix(Matrix *A)
-{
-    if(A->Xsize != A->Ysize)
-    {
-        printf("# A matriz nao possui um tamanho compativel! \n");
-        return NULL;
-    }
-    
-    Matrix* identity = (Matrix *) malloc(sizeof(Matrix));
-    identity->matrix = alloc_Matrix(A->Xsize, A->Ysize);
-    if(identity == NULL)
-    {
-        printf("# Incapaz de incializar matriz identidade! \n");
-        return NULL;
-    }
-    for(int i = 0; i < identity->Xsize; i++)
-    {
-        for(int j = 0; j < identity->Xsize; j++)
-        {
-            if(i == j)
-                identity->matrix[i][j] = 1;
-            else
-                identity->matrix[i][j] = 0;
-        }
-    }
-
-    Matrix *result = (Matrix *) malloc(sizeof(Matrix));
-    result->matrix = alloc_Matrix(A->Xsize, A->Ysize);
-    if(result->matrix == NULL)
-    {
-        printf("# Incapaz de incializar matriz identidade! \n");
-        return NULL;
-    }
-
-    for(int i = 0; i < result->Xsize; i++)
-    {
-        for(int j = 0; j < result->Xsize; j++)
-        {
-        }
-    }
-
-}
-
 int main(int argc, char **argv)
 {
     char command[COMMAND_SIZE], action;
@@ -149,9 +106,7 @@ int main(int argc, char **argv)
                 break;
             case '.':
                 show_Matrix(A_Matrix);
-                split_Matrix_AtCol(A_Matrix, &B_Matrix, &RES_Matrix, 2);
-                show_Matrix(B_Matrix);
-                show_Matrix(RES_Matrix);
+                printf("> POS: %d", find_MatrixRow_Element_AtCol(A_Matrix, 2, true));
                 break;
             case 'x':
             case 'X':

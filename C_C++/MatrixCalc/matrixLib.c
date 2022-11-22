@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "matrixLib.h"
 
 void free_Matrix(Matrix* freed)
@@ -39,15 +40,46 @@ double** alloc_Matrix(int Xsize, int Ysize)
     return out;
 }
 
+void copy_Matrix(Matrix *source, Matrix *destiny)
+{
+    if(source == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Argumento de entrada invalido \n");
+        return;
+    }
+    if(destiny == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Argumento de saida invalido \n");
+        return;
+    }
+    if(source->Xsize != destiny->Xsize || source->Ysize != destiny->Ysize)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Tamanhos diferentes nao sao permitidos \n");
+        return;
+    }
+
+    for(int i = 0; i < source->Ysize; i++)
+    {
+        for(int j = 0; j < source->Xsize; j++)
+            destiny->matrix[i][j] = source->matrix[i][j];
+    }
+    return;
+}
+
 void show_Matrix(Matrix* show)
 {
     if(show == NULL)
     {
+        printf("ERROR: %s", __FUNCTION__);
         printf("# Argumentos invalidos! \n");
         return;
     }
     if(show->Xsize < 1 || show->Ysize < 1)
     {
+        printf("ERROR: %s", __FUNCTION__);
         printf("# Tamanhos fora de escala! \n");
         return;
     }
@@ -214,16 +246,125 @@ void split_Matrix_AtCol(Matrix *origin, Matrix **left, Matrix **right, int colum
     if(*left == NULL)
     {
         printf("ERROR: %s", __FUNCTION__);
+        printf("# Nao foi possivel extrair lado esquerdo \n");
         return;
     }
     *right = extract_Matrix(origin, 0, column+1, origin->Ysize-1, origin->Xsize-1);
     if(*right == NULL)
     {
         printf("ERROR: %s", __FUNCTION__);
+        printf("# Nao foi possivel extrair lado direito \n");
         return;
     }
 
     return;
+}
+
+int find_MatrixRow_Element_AtCol(Matrix *A, int col, int biggest)
+{
+    if(A == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Matriz invalido \n");
+        return -1;
+    }
+    if(col < 0 || col >= A->Xsize)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Coluna invalida \n");
+        return -1;
+    }
+    int resultN, resultI = -1;
+    if(biggest == 0)
+        resultN = INT_MAX;
+    else resultN = INT_MIN;
+
+    for(int i = 0; i < A->Ysize; i++)
+    {
+        if((biggest == 0 && A->matrix[i][col] < resultN) || (A->matrix[i][col] > resultN))
+            resultI = i, resultN = A->matrix[i][col];
+    }   
+
+    return resultI;
+}
+
+void multiply_MatrixRow(Matrix *A, int row, double num)
+{
+    if(A == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Matriz invalido \n");
+        return;
+    }
+    if(row < 0 || row > A->Ysize)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Tamanho invalido \n");
+        return;
+    }
+
+    for(int i = 0; i < A->Xsize; i++)
+        A->matrix[row][i] *= num;
+    return;
+}
+
+Matrix *add_Matrix_Part(Matrix *main, Matrix *add, int atRow, int atCol, int untilRow, int untilCol)
+{
+    if(main == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Argumento base invalido \n");
+        return NULL;
+    }
+    if(add == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Argumento de soma invalido \n");
+        return NULL;
+    }
+    if(atRow < 0 || atRow >= main->Ysize || atCol < 0 || atCol >= main->Xsize)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Posicao inicial invalida \n");
+        return NULL;
+    }
+    if( untilRow < 0 || untilRow >= add->Ysize || untilRow > main->Ysize || untilRow < atRow ||
+        untilCol < 0 || untilCol >= add->Xsize || untilCol > main->Xsize || untilCol < atCol)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Posicao final invalida \n");
+        return NULL;
+    }
+
+    Matrix *res = (Matrix *) malloc(sizeof(Matrix));
+    if(res == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Incapaz de incializar matriz! \n");
+        return NULL;
+    }
+    res->Xsize = main->Xsize, res->Ysize = main->Ysize;
+    
+    res->matrix = alloc_Matrix(res->Xsize, res->Ysize);
+    if(res->matrix == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Incapaz de incializar valores matriz! \n");
+        return NULL;
+    }
+
+    int fromRow = 0, fromCol = 0;
+    for(int i = 0; i < res->Ysize; i++)
+    {
+        for(int j = 0; j < res->Xsize; j++)
+        {
+            res->matrix[i][j] = main->matrix[i][j];
+            if((i >= atRow && j >= atCol) && (i <= untilRow && j <= untilCol))
+                res->matrix[i][j] += add->matrix[i-atRow][j-atCol];
+        }
+    }
+    
+    return res;
 }
 
 Matrix* multiply_MatrixByN(Matrix* A)
@@ -308,4 +449,47 @@ Matrix* multiply_Matrixes(Matrix *A, Matrix *B)
     }
     printf("$ Multiplicacao concluida com sucesso! \n");
     return res;
+}
+
+Matrix* getInverse_Matrix(Matrix *A)
+{
+    if(A->Xsize != A->Ysize)
+    {
+        printf("# A matriz nao possui um tamanho compativel! \n");
+        return NULL;
+    }
+    
+    Matrix* identity = (Matrix *) malloc(sizeof(Matrix));
+    identity->matrix = alloc_Matrix(A->Xsize, A->Ysize);
+    if(identity == NULL)
+    {
+        printf("# Incapaz de incializar matriz identidade! \n");
+        return NULL;
+    }
+    for(int i = 0; i < identity->Xsize; i++)
+    {
+        for(int j = 0; j < identity->Xsize; j++)
+        {
+            if(i == j)
+                identity->matrix[i][j] = 1;
+            else
+                identity->matrix[i][j] = 0;
+        }
+    }
+
+    Matrix *result = (Matrix *) malloc(sizeof(Matrix));
+    result->matrix = alloc_Matrix(A->Xsize, A->Ysize);
+    if(result->matrix == NULL)
+    {
+        printf("# Incapaz de incializar matriz identidade! \n");
+        return NULL;
+    }
+
+    for(int i = 0; i < result->Xsize; i++)
+    {
+        for(int j = 0; j < result->Xsize; j++)
+        {
+        }
+    }
+
 }
