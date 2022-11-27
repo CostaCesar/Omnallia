@@ -10,7 +10,7 @@ Matrix* get_Matrix()
 {
     int x = 0, y = 0;
     printf("> Tamanho da matriz [Y X]: ");
-    scanf("%d %d", &x, &y);
+    scanf("%d %d", &y, &x);
 
     if(x < 1 || y < 1)
     {
@@ -102,7 +102,8 @@ int main(int argc, char **argv)
                 break;
             case '.':
                 show_Matrix(A_Matrix);
-                printf("> POS: %d", find_MatrixRow_Element_AtCol(A_Matrix, 2, true));
+                RES_Matrix = multiplyRow_AddMatrix(A_Matrix, 2, 5, 3);
+                show_Matrix(RES_Matrix);
                 break;
             case 'x':
             case 'X':

@@ -26,15 +26,16 @@ Matrix* alloc_Matrix(int Xsize, int Ysize)
     Matrix *output = (Matrix *) malloc(sizeof(Matrix));
     if(output == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Incapaz de alocar matriz \n");
         return NULL;
     }
 
+    output->Xsize = Xsize, output->Ysize = Ysize;
     output->matrix = (double **) malloc(Ysize * sizeof(double*));
     if(output->matrix == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Incapaz de inicializar matriz \n");
         return NULL;
     }
@@ -43,7 +44,7 @@ Matrix* alloc_Matrix(int Xsize, int Ysize)
         output->matrix[i] = (double *) malloc(Xsize * sizeof(double));
         if(output->matrix[i] == NULL)
         {
-            printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+            printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
             printf("# Incapaz de inicializar posicao %d\n", i);
             return NULL;
         }
@@ -55,19 +56,19 @@ void copy_Matrix(Matrix *source, Matrix *destiny)
 {
     if(source == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumento de entrada invalido \n");
         return;
     }
     if(destiny == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumento de saida invalido \n");
         return;
     }
     if(source->Xsize != destiny->Xsize || source->Ysize != destiny->Ysize)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Tamanhos diferentes nao sao permitidos \n");
         return;
     }
@@ -78,6 +79,26 @@ void copy_Matrix(Matrix *source, Matrix *destiny)
             destiny->matrix[i][j] = source->matrix[i][j];
     }
     return;
+}
+
+Matrix *clone_Matrix(Matrix *source)
+{
+    if(source == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Argumento de entrada invalido \n");
+        return NULL;
+    }
+
+    Matrix *res = alloc_Matrix(source->Xsize, source->Ysize);
+    if(res == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+
+    copy_Matrix(source, res);
+    return res;
 }
 
 void show_Matrix(Matrix* show)
@@ -129,14 +150,14 @@ Matrix* extract_Matrix(Matrix *extractFrom, int rowStart, int colStart, int rowE
 {
     if(rowStart < 0 || rowEnd < 0 || rowStart >= extractFrom->Ysize || rowEnd >= extractFrom->Ysize || rowStart > rowEnd)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
-        printf("# Tamanhos de linha invavidos! \n");
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Tamanhos de linha invalidos! \n");
         return NULL;
     }
     if(colStart < 0 || colEnd < 0 || colStart >= extractFrom->Xsize || colEnd >= extractFrom->Xsize || colStart > colEnd)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
-        printf("# Tamanhos de coluna invavidos! \n");
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Tamanhos de coluna invalidos! \n");
         return NULL;
     }
     int rowDif = rowEnd - rowStart + 1, colDif = colEnd - colStart + 1;
@@ -144,7 +165,7 @@ Matrix* extract_Matrix(Matrix *extractFrom, int rowStart, int colStart, int rowE
     Matrix *result = alloc_Matrix(colDif, rowDif);
     if(result == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         return NULL;
     } 
 
@@ -188,7 +209,7 @@ Matrix *join_Matrix_Left(Matrix *Base, Matrix *Add)
     Matrix* result = alloc_Matrix(Base->Xsize + Add->Xsize, Base->Ysize);
     if(result == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         return NULL;
     }
 
@@ -254,13 +275,13 @@ int find_MatrixRow_Element_AtCol(Matrix *A, int col, int biggest)
 {
     if(A == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Matriz invalido \n");
         return -1;
     }
     if(col < 0 || col >= A->Xsize)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Coluna invalida \n");
         return -1;
     }
@@ -282,13 +303,13 @@ void multiply_MatrixRow(Matrix *A, int row, double num)
 {
     if(A == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Matriz invalido \n");
         return;
     }
     if(row < 0 || row > A->Ysize)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Tamanho invalido \n");
         return;
     }
@@ -302,26 +323,26 @@ Matrix *add_Matrix_Part(Matrix *main, Matrix *add, int atRow, int atCol, int unt
 {
     if(main == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumento base invalido \n");
         return NULL;
     }
     if(add == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumento de soma invalido \n");
         return NULL;
     }
     if(atRow < 0 || atRow >= main->Ysize || atCol < 0 || atCol >= main->Xsize)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Posicao inicial invalida \n");
         return NULL;
     }
-    if( untilRow < 0 || untilRow >= add->Ysize || untilRow > main->Ysize || untilRow < atRow ||
-        untilCol < 0 || untilCol >= add->Xsize || untilCol > main->Xsize || untilCol < atCol)
+    if( untilRow < 0 || untilRow >= add->Ysize || untilRow > main->Ysize ||
+        untilCol < 0 || untilCol >= add->Xsize || untilCol > main->Xsize)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Posicao final invalida \n");
         return NULL;
     }
@@ -329,17 +350,16 @@ Matrix *add_Matrix_Part(Matrix *main, Matrix *add, int atRow, int atCol, int unt
     Matrix * res = alloc_Matrix(main->Xsize, main->Ysize);
     if(res == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         return NULL;
     }
 
-    int fromRow = 0, fromCol = 0;
     for(int i = 0; i < res->Ysize; i++)
     {
         for(int j = 0; j < res->Xsize; j++)
         {
             res->matrix[i][j] = main->matrix[i][j];
-            if((i >= atRow && j >= atCol) && (i <= untilRow && j <= untilCol))
+            if((i >= atRow && j >= atCol) && (i-atRow <= untilRow && j-atCol <= untilCol))
                 res->matrix[i][j] += add->matrix[i-atRow][j-atCol];
         }
     }
@@ -351,13 +371,13 @@ Matrix* multiply_MatrixByN(Matrix* A)
 {
     if(A == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumentos invalidos! \n");
         return NULL;
     }
     if(A->Xsize < 1)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Tamanhos fora de escala! \n");
         return NULL;
     }
@@ -365,7 +385,7 @@ Matrix* multiply_MatrixByN(Matrix* A)
     Matrix * res = alloc_Matrix(A->Xsize, A->Ysize);
     if(res == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         return NULL;
     }
 
@@ -398,7 +418,7 @@ Matrix* multiply_Matrixes(Matrix *A, Matrix *B)
     Matrix *res = alloc_Matrix(B->Xsize, A->Ysize);
     if(res == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         return NULL;
     }
 
@@ -417,11 +437,51 @@ Matrix* multiply_Matrixes(Matrix *A, Matrix *B)
     return res;
 }
 
+Matrix* multiplyRow_AddMatrix(Matrix *A, int multipRow, double num, int addRow)
+{
+    if(A == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Argumento matriz invalido \n");
+        return NULL;
+    }
+    if(multipRow < 0 || multipRow >= A->Ysize)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Argumento linha multiplicada invalido \n");
+        return NULL;
+    }
+    if(addRow < 0 || addRow >= A->Ysize)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Argumento linha adicionada invalido \n");
+        return NULL;
+    }
+
+    Matrix *intermed = extract_Row(A, multipRow);
+    if(intermed == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+    multiply_MatrixRow(intermed, 0, num);
+
+    Matrix *res = add_Matrix_Part(A, intermed, addRow, 0, 0, intermed->Xsize-1);
+    if(intermed == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        free_Matrix(intermed);
+        return NULL;
+    }
+    free_Matrix(intermed);
+    return res;
+}
+
 Matrix* getInverse_Matrix(Matrix *A)
 {
     if(A->Xsize != A->Ysize)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# A matriz nao possui um tamanho compativel! \n");
         return NULL;
     }
@@ -429,7 +489,7 @@ Matrix* getInverse_Matrix(Matrix *A)
     Matrix* identity = alloc_Matrix(A->Xsize, A->Ysize);
     if(identity == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Incapaz de incializar matriz identidade! \n");
         return NULL;
     }
@@ -447,7 +507,7 @@ Matrix* getInverse_Matrix(Matrix *A)
     Matrix *result = alloc_Matrix(A->Xsize, A->Ysize);
     if(result == NULL)
     {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Incapaz de incializar matriz identidade! \n");
         return NULL;
     }
