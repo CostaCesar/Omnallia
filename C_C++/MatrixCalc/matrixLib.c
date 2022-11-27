@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
+#include <float.h>
+#include <math.h>
 #include "matrixLib.h"
+
+#define MATRIXLIB_INVERSE_ITERATIONS 100
+#define MATRIXLIB_COMP_TOLERANCE 0.00001
 
 void free_Matrix(Matrix* freed)
 {
@@ -50,6 +54,34 @@ Matrix* alloc_Matrix(int Xsize, int Ysize)
         }
     }
     return output;
+}
+
+int comp_Matrix(const Matrix *A, const Matrix *B)
+{
+    if(A == NULL || B == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Argumento matriz invalido! \n");
+        return 0;
+    }
+    if(A->Xsize != B->Xsize || A->Ysize != B->Ysize)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("#Impossivel comparar tamanhos diferentes! \n");
+        return 0;
+    }
+
+    for(int i = 0; i < A->Ysize; i++)
+    {
+        for(int j = 0; j < A->Xsize; j++)
+        {
+            if( A->matrix[i][j] > B->matrix[i][j] + MATRIXLIB_COMP_TOLERANCE ||
+                A->matrix[i][j] < B->matrix[i][j] - MATRIXLIB_COMP_TOLERANCE)
+                return 0;
+
+        }
+    }
+    return 1;
 }
 
 void copy_Matrix(Matrix *source, Matrix *destiny)
@@ -116,6 +148,7 @@ void show_Matrix(Matrix* show)
         return;
     }
 
+    putchar('\n');
     for(int i = 0; i < show->Ysize; i++)
     {
         printf("<<<Lin %d>>> \n", i);
@@ -213,6 +246,7 @@ Matrix *join_Matrix_Left(Matrix *Base, Matrix *Add)
         return NULL;
     }
 
+    result->Ysize = Base->Ysize, result->Xsize = Base->Xsize + Add->Xsize;
     for(int i = 0; i < Base->Ysize; i++)
     {
         int resultPos = 0;
@@ -271,7 +305,7 @@ void split_Matrix_AtCol(Matrix *origin, Matrix **left, Matrix **right, int colum
     return;
 }
 
-int find_MatrixRow_Element_AtCol(Matrix *A, int col, int biggest)
+int find_MatrixRowNum_AtCol(Matrix *A, int col)
 {
     if(A == NULL)
     {
@@ -285,15 +319,13 @@ int find_MatrixRow_Element_AtCol(Matrix *A, int col, int biggest)
         printf("# Coluna invalida \n");
         return -1;
     }
-    int resultN, resultI = -1;
-    if(biggest == 0)
-        resultN = INT_MAX;
-    else resultN = INT_MIN;
+    double resultN = -DBL_MAX;
+    int resultI = 0;
 
     for(int i = 0; i < A->Ysize; i++)
     {
-        if((biggest == 0 && A->matrix[i][col] < resultN) || (A->matrix[i][col] > resultN))
-            resultI = i, resultN = A->matrix[i][col];
+        if(fabs(A->matrix[i][col]) > resultN)
+            resultI = i, resultN = fabs(A->matrix[i][col]);
     }   
 
     return resultI;
@@ -437,32 +469,32 @@ Matrix* multiply_Matrixes(Matrix *A, Matrix *B)
     return res;
 }
 
-Matrix* multiplyRow_AddMatrix(Matrix *A, int multipRow, double num, int addRow)
+void multiplyRow_AddMatrix(Matrix *A, int multipRow, double num, int addRow)
 {
     if(A == NULL)
     {
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumento matriz invalido \n");
-        return NULL;
+        return;
     }
     if(multipRow < 0 || multipRow >= A->Ysize)
     {
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumento linha multiplicada invalido \n");
-        return NULL;
+        return;
     }
     if(addRow < 0 || addRow >= A->Ysize)
     {
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Argumento linha adicionada invalido \n");
-        return NULL;
+        return;
     }
 
     Matrix *intermed = extract_Row(A, multipRow);
     if(intermed == NULL)
     {
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
-        return NULL;
+        return;
     }
     multiply_MatrixRow(intermed, 0, num);
 
@@ -471,10 +503,42 @@ Matrix* multiplyRow_AddMatrix(Matrix *A, int multipRow, double num, int addRow)
     {
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         free_Matrix(intermed);
+        return;
+    }
+    
+    copy_Matrix(res, A);
+    free_Matrix(intermed);
+    free(res);
+    return;
+}
+
+Matrix *create_IdentityMatrix(Matrix *A)
+{
+    if((A == NULL) || A->Xsize < 1 || A->Ysize < 1)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Argumerto matriz invalido! ");
         return NULL;
     }
-    free_Matrix(intermed);
-    return res;
+
+    
+    Matrix *out = alloc_Matrix(A->Xsize, A->Ysize);
+    if(out == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+
+    for(int i = 0; i < out->Ysize; i++)
+    {
+        for(int j = 0; j < out->Xsize; j++)
+        {
+            if(i == j) out->matrix[i][j] = 1;
+            else out->matrix[i][j] = 0;
+        }
+    }
+
+    return out;
 }
 
 Matrix* getInverse_Matrix(Matrix *A)
@@ -486,37 +550,90 @@ Matrix* getInverse_Matrix(Matrix *A)
         return NULL;
     }
     
-    Matrix* identity = alloc_Matrix(A->Xsize, A->Ysize);
+    Matrix* identity = create_IdentityMatrix(A);
     if(identity == NULL)
     {
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Incapaz de incializar matriz identidade! \n");
         return NULL;
     }
-    for(int i = 0; i < identity->Xsize; i++)
-    {
-        for(int j = 0; j < identity->Xsize; j++)
-        {
-            if(i == j)
-                identity->matrix[i][j] = 1;
-            else
-                identity->matrix[i][j] = 0;
-        }
-    }
 
-    Matrix *result = alloc_Matrix(A->Xsize, A->Ysize);
-    if(result == NULL)
+    Matrix *mid = join_Matrix_Left(A, identity);
+    if(mid == NULL)
     {
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         printf("# Incapaz de incializar matriz identidade! \n");
+        free(identity);
         return NULL;
     }
 
-    for(int i = 0; i < result->Xsize; i++)
+    int cRow, cCol, completed = 0;
+    for(int count = 0; completed == 0 && count < MATRIXLIB_INVERSE_ITERATIONS; count++)
     {
-        for(int j = 0; j < result->Xsize; j++)
+        for(int diagI = 0; diagI < mid->Ysize; diagI++)
         {
-        }
-    }
+            show_Matrix(mid);
+            cRow = diagI, cCol = diagI;
+            int maxI = find_MatrixRowNum_AtCol(mid, cCol);
+            if(maxI != cRow)
+                swap_MatrixRows(mid, cRow, maxI);
+            
+            if(mid->matrix[cRow][cCol] != 1)
+            {
+                double factor = 1.0/mid->matrix[cRow][cCol];
+                multiply_MatrixRow(mid, cRow, factor);
+            }
 
+            for(int rowI = cRow+1; rowI < mid->Ysize; rowI++)
+            {
+                if(mid->matrix[rowI][cCol] != 0)
+                {
+                    int baseRow = cCol;
+                    double cValue = mid->matrix[rowI][cCol], baseValue = mid->matrix[baseRow][cCol];
+                    if(baseValue != 0)
+                    {
+                        double factor = -(cValue/baseValue);
+                        multiplyRow_AddMatrix(mid, baseRow, factor, rowI);
+                    }
+                }
+            }
+
+            for(int colI = cRow+1; colI < A->Xsize; colI++)
+            {
+                if(mid->matrix[cRow][colI] != 0)
+                {
+                    int baseRow = colI;
+                    double cValue = mid->matrix[cRow][colI], baseValue = mid->matrix[baseRow][colI];
+                    if(baseValue != 0)
+                    {
+                        double factor = -(cValue/baseValue);
+                        multiplyRow_AddMatrix(mid, baseRow, factor, cRow);
+                    }
+                } 
+            }
+        }
+
+        Matrix *left = extract_Matrix(mid, 0, 0, A->Ysize-1, A->Xsize-1);
+        if(left == NULL)
+        {
+            printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+            return NULL;
+        }
+        
+        if(comp_Matrix(left, identity) == 1)
+        {
+            completed = 1;
+            Matrix *result = extract_Matrix(mid, 0, A->Xsize, mid->Ysize-1, mid->Xsize-1);
+            free(identity);
+            free(mid);
+            return result;
+        }
+        free(left);
+    }
+    
+    printf("WARNING: %s, %d \n", __FUNCTION__, __LINE__);
+    printf("# Incapaz de encontrar inversa! \n");
+    free(identity);
+    free(mid);
+    return NULL;
 }
