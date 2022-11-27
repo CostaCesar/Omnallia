@@ -8,25 +8,21 @@
 
 Matrix* get_Matrix()
 {
-    Matrix *out = (Matrix *) malloc(sizeof(Matrix));
-    if(out == NULL)
-    {
-        printf("# Incapaz de incializar matriz! \n");
-        return NULL;
-    }
+    int x = 0, y = 0;
     printf("> Tamanho da matriz [Y X]: ");
-    scanf("%d %d", &out->Ysize, &out->Xsize);
+    scanf("%d %d", &x, &y);
 
-    if(out->Xsize < 0 || out->Ysize < 0)
+    if(x < 1 || y < 1)
     {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# Tamanho invalido! \n");
         return NULL;
     }
 
-    out->matrix = alloc_Matrix(out->Xsize, out->Ysize);
-    if(out->matrix == NULL)
+    Matrix * out = alloc_Matrix(x, y);
+    if(out == NULL)
     {
-        printf("# Incapaz de incializar valores da matriz! \n");
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         return NULL;
     }
     for(int i = 0; i < out->Ysize; i++)

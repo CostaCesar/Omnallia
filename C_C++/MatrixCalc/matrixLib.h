@@ -6,7 +6,7 @@ typedef struct P_Matrix
 } Matrix;
 
 void free_Matrix(Matrix* freed);
-double** alloc_Matrix(int Xsize, int Ysize);
+Matrix* alloc_Matrix(int Xsize, int Ysize);
 void show_Matrix(Matrix* show);
 void copy_Matrix(Matrix *source, Matrix *destiny);
 void swap_MatrixRows(Matrix *A, int rowA, int rowB);

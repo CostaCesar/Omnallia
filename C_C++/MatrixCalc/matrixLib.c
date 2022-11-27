@@ -21,23 +21,34 @@ void free_Matrix(Matrix* freed)
     return;
 }
 
-double** alloc_Matrix(int Xsize, int Ysize)
+Matrix* alloc_Matrix(int Xsize, int Ysize)
 {
-    double **out = (double **) malloc(Ysize * sizeof(double*));
-    if(out == NULL)
+    Matrix *output = (Matrix *) malloc(sizeof(Matrix));
+    if(output == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Incapaz de alocar matriz \n");
         return NULL;
+    }
+
+    output->matrix = (double **) malloc(Ysize * sizeof(double*));
+    if(output->matrix == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Incapaz de inicializar matriz \n");
+        return NULL;
+    }
     for(int i = 0; i < Ysize; i++)
     {
-        out[i] = (double *) malloc(Xsize * sizeof(double));
-        if(out[i] == NULL)
+        output->matrix[i] = (double *) malloc(Xsize * sizeof(double));
+        if(output->matrix[i] == NULL)
         {
-            for(int ii = 0; i < i; ii++)
-                free(out[ii]);
-            free(out);
+            printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+            printf("# Incapaz de inicializar posicao %d\n", i);
             return NULL;
         }
     }
-    return out;
+    return output;
 }
 
 void copy_Matrix(Matrix *source, Matrix *destiny)
@@ -118,34 +129,24 @@ Matrix* extract_Matrix(Matrix *extractFrom, int rowStart, int colStart, int rowE
 {
     if(rowStart < 0 || rowEnd < 0 || rowStart >= extractFrom->Ysize || rowEnd >= extractFrom->Ysize || rowStart > rowEnd)
     {
-        printf("ERROR: %s", __FUNCTION__);
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# Tamanhos de linha invavidos! \n");
         return NULL;
     }
     if(colStart < 0 || colEnd < 0 || colStart >= extractFrom->Xsize || colEnd >= extractFrom->Xsize || colStart > colEnd)
     {
-        printf("ERROR: %s", __FUNCTION__);
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# Tamanhos de coluna invavidos! \n");
         return NULL;
     }
     int rowDif = rowEnd - rowStart + 1, colDif = colEnd - colStart + 1;
 
-    Matrix* result = (Matrix *) malloc(sizeof(Matrix));
+    Matrix *result = alloc_Matrix(colDif, rowDif);
     if(result == NULL)
     {
-        printf("ERROR: %s", __FUNCTION__);
-        printf("# Incapaz de inicializar resultado! \n");
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         return NULL;
     } 
-    result->Xsize = colDif, result->Ysize = rowDif;
-    result->matrix = alloc_Matrix(result->Xsize, result->Ysize);
-    if(result->matrix == NULL)
-    {
-        printf("ERROR: %s", __FUNCTION__);
-        printf("# Incapaz de inicializar matriz! \n");
-        free_Matrix(result);
-        return NULL;
-    }
 
     for(int i = rowStart; i <= rowEnd; i++)
     {
@@ -184,21 +185,10 @@ Matrix *join_Matrix_Left(Matrix *Base, Matrix *Add)
     }
 
 
-    Matrix* result = (Matrix *) malloc(sizeof(Matrix));
+    Matrix* result = alloc_Matrix(Base->Xsize + Add->Xsize, Base->Ysize);
     if(result == NULL)
     {
-        printf("ERROR: %s", __FUNCTION__);
-        printf("# Incapaz de inicializar resultado! \n");
-        return NULL;
-    }
-    
-    result->Xsize = Base->Xsize + Add->Xsize, result->Ysize = Base->Ysize;
-    result->matrix = alloc_Matrix(result->Xsize, result->Ysize);
-    if(result->matrix == NULL)
-    {
-        printf("ERROR: %s", __FUNCTION__);
-        printf("# Incapaz de inicializar matriz! \n");
-        free_Matrix(result);
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         return NULL;
     }
 
@@ -336,20 +326,10 @@ Matrix *add_Matrix_Part(Matrix *main, Matrix *add, int atRow, int atCol, int unt
         return NULL;
     }
 
-    Matrix *res = (Matrix *) malloc(sizeof(Matrix));
+    Matrix * res = alloc_Matrix(main->Xsize, main->Ysize);
     if(res == NULL)
     {
         printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
-        printf("# Incapaz de incializar matriz! \n");
-        return NULL;
-    }
-    res->Xsize = main->Xsize, res->Ysize = main->Ysize;
-    
-    res->matrix = alloc_Matrix(res->Xsize, res->Ysize);
-    if(res->matrix == NULL)
-    {
-        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
-        printf("# Incapaz de incializar valores matriz! \n");
         return NULL;
     }
 
@@ -371,27 +351,21 @@ Matrix* multiply_MatrixByN(Matrix* A)
 {
     if(A == NULL)
     {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# Argumentos invalidos! \n");
         return NULL;
     }
     if(A->Xsize < 1)
     {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# Tamanhos fora de escala! \n");
         return NULL;
     }
-
-    Matrix *res = (Matrix *) malloc(sizeof(Matrix));
+    
+    Matrix * res = alloc_Matrix(A->Xsize, A->Ysize);
     if(res == NULL)
     {
-        printf("# Incapaz de incializar matriz! \n");
-        return NULL;
-    }
-    res->Xsize = A->Xsize, res->Ysize = A->Ysize;
-    
-    res->matrix = alloc_Matrix(res->Xsize, res->Ysize);
-    if(res->matrix == NULL)
-    {
-        printf("# Incapaz de incializar valores matriz! \n");
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         return NULL;
     }
 
@@ -421,18 +395,10 @@ Matrix* multiply_Matrixes(Matrix *A, Matrix *B)
         return NULL;
     }
 
-    Matrix *res = (Matrix *) malloc(sizeof(Matrix));
+    Matrix *res = alloc_Matrix(B->Xsize, A->Ysize);
     if(res == NULL)
     {
-        printf("# Incapaz de incializar matriz! \n");
-        return NULL;
-    }
-
-    res->Xsize = B->Xsize, res->Ysize = A->Ysize;
-    res->matrix = alloc_Matrix(res->Xsize, res->Ysize);
-    if(res->matrix == NULL)
-    {
-        printf("# Incapaz de incializar valores matriz! \n");
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         return NULL;
     }
 
@@ -455,14 +421,15 @@ Matrix* getInverse_Matrix(Matrix *A)
 {
     if(A->Xsize != A->Ysize)
     {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# A matriz nao possui um tamanho compativel! \n");
         return NULL;
     }
     
-    Matrix* identity = (Matrix *) malloc(sizeof(Matrix));
-    identity->matrix = alloc_Matrix(A->Xsize, A->Ysize);
+    Matrix* identity = alloc_Matrix(A->Xsize, A->Ysize);
     if(identity == NULL)
     {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# Incapaz de incializar matriz identidade! \n");
         return NULL;
     }
@@ -477,10 +444,10 @@ Matrix* getInverse_Matrix(Matrix *A)
         }
     }
 
-    Matrix *result = (Matrix *) malloc(sizeof(Matrix));
-    result->matrix = alloc_Matrix(A->Xsize, A->Ysize);
-    if(result->matrix == NULL)
+    Matrix *result = alloc_Matrix(A->Xsize, A->Ysize);
+    if(result == NULL)
     {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
         printf("# Incapaz de incializar matriz identidade! \n");
         return NULL;
     }
