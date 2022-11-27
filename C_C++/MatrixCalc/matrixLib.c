@@ -572,7 +572,6 @@ Matrix* getInverse_Matrix(Matrix *A)
     {
         for(int diagI = 0; diagI < mid->Ysize; diagI++)
         {
-            show_Matrix(mid);
             cRow = diagI, cCol = diagI;
             int maxI = find_MatrixRowNum_AtCol(mid, cCol);
             if(maxI != cRow)
