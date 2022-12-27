@@ -1,7 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <math.h>
 #include "matrixLib.h"
 
 #define COMMAND_SIZE 128
@@ -55,6 +52,7 @@ int main(int argc, char **argv)
         printf("<[E] Multiplicar Matriz 1 x Matriz 2> \n");
         printf("<[D] Multiplicar Matriz 2 x Matriz 1> \n");
         printf("<[Z] Obter Matriz Inversa Da Matriz 1> \n");
+        printf("<[V] Obter Determinante Da Matriz 1> \n");
         printf("<[.] Testar uma funcao nova> \n");
         printf("<[X] Sair> \n");
         fflush(stdin);
@@ -97,13 +95,15 @@ int main(int argc, char **argv)
                 break;
             case 'z':
             case 'Z':
-                RES_Matrix = getInverse_Matrix(A_Matrix);
+                RES_Matrix = getInverse_Matrix(A_Matrix); 
                 show_Matrix(RES_Matrix);
                 break;
-            case '.':
+            case 'v':
+            case 'V':
                 show_Matrix(A_Matrix);
-                RES_Matrix = multiplyRow_AddMatrix(A_Matrix, 2, 5, 3);
-                show_Matrix(RES_Matrix);
+                printf("\n$ Determinante da matriz: %.5lf $ \n", getDeterminant(A_Matrix));
+                break;
+            case '.':
                 break;
             case 'x':
             case 'X':

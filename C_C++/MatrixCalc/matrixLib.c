@@ -7,6 +7,8 @@
 #define MATRIXLIB_INVERSE_ITERATIONS 100
 #define MATRIXLIB_COMP_TOLERANCE 0.00001
 
+static int _Matrix_Error_ = 0;
+
 void free_Matrix(Matrix* freed)
 {
     if(freed != NULL)
@@ -512,7 +514,7 @@ void multiplyRow_AddMatrix(Matrix *A, int multipRow, double num, int addRow)
     return;
 }
 
-Matrix *create_IdentityMatrix(Matrix *A)
+Matrix* create_IdentityMatrix(Matrix *A)
 {
     if((A == NULL) || A->Xsize < 1 || A->Ysize < 1)
     {
@@ -635,4 +637,93 @@ Matrix* getInverse_Matrix(Matrix *A)
     free(identity);
     free(mid);
     return NULL;
+}
+
+Matrix* extract_Matrix_Except(Matrix* A, int rowExcep, int colExcep)
+{
+    if(A == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Matriz invalida! \n");
+        return NULL;
+    }
+
+    if(rowExcep < 0 || rowExcep >= A->Ysize || colExcep < 0 || colExcep >= A->Xsize)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Tamanho da matriz invalido \n");
+        return NULL;
+    }
+
+    Matrix *res = alloc_Matrix(A->Xsize - 1, A->Ysize - 1);
+    if(res == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+
+    int rowOffset = 0, colOffset = 0;
+    for(int i = 0; i < A->Ysize -1; i++)
+    {
+        colOffset = 0;
+        if(i >= rowExcep)
+            rowOffset = 1;
+          
+        for(int j = 0; j < A->Xsize -1; j++)
+        {
+            if(j >= colExcep)
+                colOffset = 1;
+
+            res->matrix[i][j] = A->matrix[i + rowOffset][j + colOffset];
+        }
+    }
+    return res;
+}
+
+double getDeterminant(Matrix *A)
+{
+    int res = 0, buffer = 0;
+    _Matrix_Error_ = 0;
+    
+    if(A == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Matriz invalida! \n");
+        return 0;
+    }
+    if(A->Xsize < 1 || A->Ysize < 1 || A->Xsize != A->Ysize)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Tamanho da matriz nao e valido ou quadrado! \n");
+        return 0; 
+    }
+
+    if(A->Xsize == 1)
+        return A->matrix[0][0];
+    if(A->Xsize == 2)
+        return (A->matrix[0][0] * A->matrix[1][1]) - (A->matrix[1][0] * A->matrix[0][1]);
+    
+    for(int i = 0; i < A->Xsize; i++)
+    {
+        Matrix *subMatrix = extract_Matrix_Except(A, 0, i);
+        if(subMatrix == NULL)
+        {
+            _Matrix_Error_ = 1;
+            printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+            return 0;
+        }
+        
+        buffer = getDeterminant(subMatrix);
+        if(_Matrix_Error_ == 1)
+        {
+            free_Matrix(subMatrix);
+            return 0;
+        }
+
+        // A[0][n] (nada otimizado) X Cofator (determinante * -pra impar & +pra par)
+        res += A->matrix[0][i] * (buffer * (i % 2 == 0 ? 1 : -1));
+        free_Matrix(subMatrix);
+    }
+
+    return res;
 }
