@@ -107,8 +107,7 @@ int main(int argc, char **argv)
                 break;
             case 'x':
             case 'X':
-                if(RES_Matrix != NULL)
-                    free_Matrix(RES_Matrix);
+                free_Matrix(RES_Matrix);
                 free_Matrix(A_Matrix);
                 free_Matrix(B_Matrix);
                 printf("$ Saindo... \n");
@@ -117,8 +116,7 @@ int main(int argc, char **argv)
                 printf("$ Comando Invalido! \n");
                 break;
         }
-        if(RES_Matrix != NULL)
-            free_Matrix(RES_Matrix);
+        free_Matrix(RES_Matrix);
     } while (1);
 
     return 1;

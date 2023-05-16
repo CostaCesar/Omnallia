@@ -24,6 +24,7 @@ void free_Matrix(Matrix* freed)
             }
         free(freed);
     }
+    freed = NULL;
     return;
 }
 
