@@ -39,22 +39,24 @@ Matrix* get_Matrix()
 int main(int argc, char **argv)
 {
     char command[COMMAND_SIZE], action;
-    Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL;
+    Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL;
 
     do
     {
         putchar('\n');
         printf("<[Q] Inserir Matriz 1> \n");
         printf("<[A] Inserir Matriz 2> \n");
+        printf("<[Z] Inserir Matriz Resultado Em> \n");
         printf("<[W] Ver Matriz 1> \n");
         printf("<[S] Ver Matriz 2> \n");
+        printf("<[X] Ver Matriz Resultado> \n");
+        printf("<[O] Trocar Matriz 1 Por Matriz 2> \n");
         printf("<[C] Multiplicar Matriz 1 X Numero N> \n");
         printf("<[E] Multiplicar Matriz 1 x Matriz 2> \n");
         printf("<[D] Multiplicar Matriz 2 x Matriz 1> \n");
-        printf("<[Z] Obter Matriz Inversa Da Matriz 1> \n");
-        printf("<[V] Obter Determinante Da Matriz 1> \n");
-        printf("<[.] Testar uma funcao nova> \n");
-        printf("<[X] Sair> \n");
+        printf("<[R] Obter Determinante Da Matriz 1> \n");
+        printf("<[T] Obter Matriz Inversa Da Matriz 1> \n");
+        printf("<[P] Sair> \n");
         fflush(stdin);
         scanf("%c", &action);
 
@@ -98,15 +100,13 @@ int main(int argc, char **argv)
                 RES_Matrix = getInverse_Matrix(A_Matrix); 
                 show_Matrix(RES_Matrix);
                 break;
-            case 'v':
-            case 'V':
+            case 'r':
+            case 'R':
                 show_Matrix(A_Matrix);
                 printf("\n$ Determinante da matriz: %.5lf $ \n", getDeterminant(A_Matrix));
                 break;
-            case '.':
-                break;
-            case 'x':
-            case 'X':
+            case 'p':
+            case 'P':
                 free_Matrix(RES_Matrix);
                 free_Matrix(A_Matrix);
                 free_Matrix(B_Matrix);
