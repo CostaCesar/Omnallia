@@ -3,6 +3,12 @@
 
 #define COMMAND_SIZE 128
 
+typedef enum E_BOOL
+{
+    True = 1,
+    False = 0
+} Bool;
+
 Matrix* get_Matrix()
 {
     int x = 0, y = 0;
@@ -40,6 +46,7 @@ int main(int argc, char **argv)
 {
     char command[COMMAND_SIZE], action;
     Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL, *Buffer = NULL;
+    Bool saveRes;
 
     do
     {
@@ -64,13 +71,32 @@ int main(int argc, char **argv)
         {
             case 'q':
             case 'Q':
-                free_Matrix(A_Matrix);
+                A_Matrix = free_Matrix(A_Matrix);
                 A_Matrix = get_Matrix();
                 break;
             case 'a':
             case 'A':
-                free_Matrix(B_Matrix);
+                B_Matrix = free_Matrix(B_Matrix);
                 B_Matrix = get_Matrix();
+                break;
+            case 'z':
+            case 'Z':
+                printf(">Inserir em [1] ou [2]: ");
+                scanf("%d", &action);
+                if(action == 1)
+                {
+                    A_Matrix = free_Matrix(A_Matrix);
+                    A_Matrix = clone_Matrix(LastRes_Matrix);
+                }
+                else if(action == 2)
+                {
+                    B_Matrix = free_Matrix(B_Matrix);
+                    B_Matrix = clone_Matrix(LastRes_Matrix);
+                }
+                else
+                {
+                    printf("# Numero da Matriz invalido! \n");
+                }
                 break;
             case 'w':
             case 'W':
@@ -79,6 +105,10 @@ int main(int argc, char **argv)
             case 's':
             case 'S':
                 show_Matrix(B_Matrix);
+                break;
+            case 'x':
+            case 'X':
+                show_Matrix(LastRes_Matrix);
                 break;
             case 'e':
             case 'E':
@@ -95,8 +125,8 @@ int main(int argc, char **argv)
                 RES_Matrix = multiply_MatrixByN(A_Matrix);
                 show_Matrix(RES_Matrix);
                 break;
-            case 'z':
-            case 'Z':
+            case 't':
+            case 'T':
                 RES_Matrix = getInverse_Matrix(A_Matrix); 
                 show_Matrix(RES_Matrix);
                 break;
@@ -112,16 +142,21 @@ int main(int argc, char **argv)
                 break;
             case 'p':
             case 'P':
-                free_Matrix(RES_Matrix);
-                free_Matrix(A_Matrix);
-                free_Matrix(B_Matrix);
+                RES_Matrix = free_Matrix(RES_Matrix);
+                A_Matrix = free_Matrix(A_Matrix);
+                B_Matrix = free_Matrix(B_Matrix);
                 printf("$ Saindo... \n");
                 return 0;
             default:
                 printf("$ Comando Invalido! \n");
                 break;
         }
-        free_Matrix(RES_Matrix);
+        if(isEmpty_Matrix(RES_Matrix))
+        {
+            LastRes_Matrix = free_Matrix(LastRes_Matrix);
+            LastRes_Matrix = clone_Matrix(RES_Matrix);
+        }
+        RES_Matrix = free_Matrix(RES_Matrix);
     } while (1);
 
     return 1;
