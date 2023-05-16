@@ -39,7 +39,7 @@ Matrix* get_Matrix()
 int main(int argc, char **argv)
 {
     char command[COMMAND_SIZE], action;
-    Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL;
+    Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL, *Buffer = NULL;
 
     do
     {
@@ -104,6 +104,11 @@ int main(int argc, char **argv)
             case 'R':
                 show_Matrix(A_Matrix);
                 printf("\n$ Determinante da matriz: %.5lf $ \n", getDeterminant(A_Matrix));
+                break;
+            case 'o':
+            case 'O':
+                Buffer = A_Matrix; A_Matrix = B_Matrix; B_Matrix = Buffer;
+                printf("\n$ Matrizes trocadas! $ \n");
                 break;
             case 'p':
             case 'P':
