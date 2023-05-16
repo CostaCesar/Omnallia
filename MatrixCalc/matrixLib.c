@@ -9,7 +9,7 @@
 
 static int _Matrix_Error_ = 0;
 
-void free_Matrix(Matrix* freed)
+Matrix* free_Matrix(Matrix* freed)
 {
     if(freed != NULL)
     {
@@ -23,9 +23,14 @@ void free_Matrix(Matrix* freed)
             free(freed->matrix);
             }
         free(freed);
+        freed = NULL;
     }
-    freed = NULL;
-    return;
+    return freed;
+}
+
+int isEmpty_Matrix(Matrix* source)
+{
+    return ((source != NULL) && source->matrix != NULL);
 }
 
 Matrix* alloc_Matrix(int Xsize, int Ysize)

@@ -5,7 +5,6 @@ typedef struct P_Matrix
     int Ysize;
 } Matrix;
 
-void free_Matrix(Matrix* freed);
 void show_Matrix(Matrix* show);
 void copy_Matrix(Matrix *source, Matrix *destiny);
 void swap_MatrixRows(Matrix *A, int rowA, int rowB);
@@ -14,7 +13,9 @@ void multiplyRow_AddMatrix(Matrix *A, int multipRow, double num, int addRow);
 void split_Matrix_AtCol(Matrix *origin, Matrix **left, Matrix **right, int column);
 int find_MatrixRowNum_AtCol(Matrix *A, int col);
 int comp_Matrix(const Matrix *A, const Matrix *B);
+int isEmpty_Matrix(Matrix* source);
 double getDeterminant(Matrix *A);
+Matrix* free_Matrix(Matrix* freed);
 Matrix* clone_Matrix(Matrix *source);
 Matrix* getInverse_Matrix(Matrix *A);
 Matrix* multiply_MatrixByN(Matrix* A);
