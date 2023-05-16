@@ -13,6 +13,7 @@ void multiply_MatrixRow(Matrix *A, int row, double num);
 void multiplyRow_AddMatrix(Matrix *A, int multipRow, double num, int addRow);
 void split_Matrix_AtCol(Matrix *origin, Matrix **left, Matrix **right, int column);
 int find_MatrixRowNum_AtCol(Matrix *A, int col);
+int comp_Matrix(const Matrix *A, const Matrix *B);
 double getDeterminant(Matrix *A);
 Matrix* clone_Matrix(Matrix *source);
 Matrix* getInverse_Matrix(Matrix *A);
