@@ -44,7 +44,7 @@ Matrix* get_Matrix()
 
 int main(int argc, char **argv)
 {
-    char command[COMMAND_SIZE], action;
+    char command[COMMAND_SIZE], action, ignore;
     Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL, *Buffer = NULL;
     Bool saveRes;
 
@@ -65,7 +65,10 @@ int main(int argc, char **argv)
         printf("<[T] Obter Matriz Inversa Da Matriz 1> \n");
         printf("<[P] Sair> \n");
         fflush(stdin);
-        scanf("%c", &action);
+        
+        // Loop to ignore '\n' left in stdin, breaks when user inputs a valid char 
+        do action = getchar();
+        while(action == '\n');
 
         switch (action)
         {
@@ -82,7 +85,7 @@ int main(int argc, char **argv)
             case 'z':
             case 'Z':
                 printf(">Inserir em [1] ou [2]: ");
-                scanf("%d", &action);
+                scanf("%d", (int*)&action);
                 if(action == 1)
                 {
                     A_Matrix = free_Matrix(A_Matrix);
