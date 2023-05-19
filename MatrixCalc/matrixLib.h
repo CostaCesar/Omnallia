@@ -14,10 +14,12 @@ void split_Matrix_AtCol(Matrix *origin, Matrix **left, Matrix **right, int colum
 int find_MatrixRowNum_AtCol(Matrix *A, int col);
 int comp_Matrix(const Matrix *A, const Matrix *B);
 int isEmpty_Matrix(Matrix* source);
-double getDeterminant(Matrix *A);
+int get_MatrixSize(Matrix* source); 
+double get_Determinant(Matrix *A);
+double* get_MatrixElements(Matrix* source);
 Matrix* free_Matrix(Matrix* freed);
 Matrix* clone_Matrix(Matrix *source);
-Matrix* getInverse_Matrix(Matrix *A);
+Matrix* get_Inverse_Matrix(Matrix *A);
 Matrix* multiply_MatrixByN(Matrix* A);
 Matrix* extract_Row(Matrix* A, int row);
 Matrix* create_IdentityMatrix(Matrix *A);

@@ -30,7 +30,40 @@ Matrix* free_Matrix(Matrix* freed)
 
 int isEmpty_Matrix(Matrix* source)
 {
-    return ((source != NULL) && source->matrix != NULL);
+    return ((source != NULL) && source->matrix != NULL && source->Xsize * source->Ysize <= 0);
+}
+
+int get_MatrixSize(Matrix* source)
+{
+    if(!isEmpty_Matrix(source))
+    {
+        return source->Xsize * source->Ysize;
+    }
+    else return 0;
+}
+
+double* get_MatrixElements(Matrix* source)
+{
+    if(isEmpty_Matrix(source))
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Incapaz de alocar matriz \n");
+        return NULL;
+    }
+
+    int matrixSize = get_MatrixSize(source);
+    double* elements = (double*) malloc(matrixSize * sizeof(double));
+    if(elements == NULL)
+    {
+        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
+        printf("# Incapaz de alocar resultado \n");
+        return NULL;
+    }
+    for(int i = 0; i < matrixSize; i++)
+    {
+        elements[i] = source->matrix[i / source->Ysize][i % source->Xsize];
+    }
+    return elements;
 }
 
 Matrix* alloc_Matrix(int Xsize, int Ysize)
@@ -549,7 +582,7 @@ Matrix* create_IdentityMatrix(Matrix *A)
     return out;
 }
 
-Matrix* getInverse_Matrix(Matrix *A)
+Matrix* get_Inverse_Matrix(Matrix *A)
 {
     if(A->Xsize != A->Ysize)
     {
@@ -686,7 +719,7 @@ Matrix* extract_Matrix_Except(Matrix* A, int rowExcep, int colExcep)
     return res;
 }
 
-double getDeterminant(Matrix *A)
+double get_Determinant(Matrix *A)
 {
     int res = 0, buffer = 0;
     _Matrix_Error_ = 0;
@@ -719,7 +752,7 @@ double getDeterminant(Matrix *A)
             return 0;
         }
         
-        buffer = getDeterminant(subMatrix);
+        buffer = get_Determinant(subMatrix);
         if(_Matrix_Error_ == 1)
         {
             free_Matrix(subMatrix);
