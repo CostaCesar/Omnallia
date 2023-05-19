@@ -1,14 +1,6 @@
 #include <stdio.h>
 #include "matrixLib.h"
 
-#define COMMAND_SIZE 128
-
-typedef enum E_BOOL
-{
-    True = 1,
-    False = 0
-} Bool;
-
 Matrix* get_Matrix()
 {
     int x = 0, y = 0;
@@ -42,12 +34,49 @@ Matrix* get_Matrix()
     return out;
 }
 
+void print_Matrix(Matrix *matrix)
+{
+    // Load Matrix
+    if(isEmpty_Matrix(matrix)) return;
+    double *elements = get_MatrixElements(matrix);
+    
+    // Separate print
+    putchar('\n');
+
+    // Print cols number
+    printf("             |");
+    for(int i = 0; i < matrix->Xsize; i++)
+    {
+        printf(" %10d |", i+1);
+    }
+    putchar('\n');
+    putchar('\n');
+
+    // Print rows number & values
+    // Number
+    for(int i = 0; i < matrix->Ysize; i++)
+    {
+        printf("| %10d |", i+1);
+
+        // Values
+        for(int j = 0; j < matrix->Xsize; j++)
+        {
+            printf("  %10.4lf ", elements[i*matrix->Xsize+j]);
+        }
+        putchar('\n');
+        putchar('\n');
+    }
+    
+    putchar('\n');
+    return;
+}
+
 int main(int argc, char **argv)
 {
-    char command[COMMAND_SIZE], action, ignore;
+    char action, ignore;
     Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL, *Buffer = NULL;
-    Bool saveRes;
 
+    Matrix *Matrices[10] = { NULL };
     do
     {
         putchar('\n');
@@ -103,40 +132,40 @@ int main(int argc, char **argv)
                 break;
             case 'w':
             case 'W':
-                show_Matrix(A_Matrix);
+                print_Matrix(A_Matrix);
                 break;
             case 's':
             case 'S':
-                show_Matrix(B_Matrix);
+                print_Matrix(B_Matrix);
                 break;
             case 'x':
             case 'X':
-                show_Matrix(LastRes_Matrix);
+                print_Matrix(LastRes_Matrix);
                 break;
             case 'e':
             case 'E':
                 RES_Matrix = multiply_Matrixes(A_Matrix, B_Matrix);
-                show_Matrix(RES_Matrix);
+                print_Matrix(RES_Matrix);
                 break;
             case 'd':
             case 'D':
                 RES_Matrix = multiply_Matrixes(A_Matrix, B_Matrix);
-                show_Matrix(RES_Matrix);
+                print_Matrix(RES_Matrix);
                 break;
             case 'c':
             case 'C':
                 RES_Matrix = multiply_MatrixByN(A_Matrix);
-                show_Matrix(RES_Matrix);
+                print_Matrix(RES_Matrix);
                 break;
             case 't':
             case 'T':
-                RES_Matrix = getInverse_Matrix(A_Matrix); 
-                show_Matrix(RES_Matrix);
+                RES_Matrix = get_Inverse_Matrix(A_Matrix); 
+                print_Matrix(RES_Matrix);
                 break;
             case 'r':
             case 'R':
-                show_Matrix(A_Matrix);
-                printf("\n$ Determinante da matriz: %.5lf $ \n", getDeterminant(A_Matrix));
+                print_Matrix(A_Matrix);
+                printf("\n$ Determinante da matriz: %.5lf $ \n", get_Determinant(A_Matrix));
                 break;
             case 'o':
             case 'O':
