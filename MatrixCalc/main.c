@@ -1,5 +1,33 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "matrixLib.h"
+
+#define NUM_MATRICES 10
+
+void display_MatrixStates(Matrix** list)
+{
+    for(int i = 0; i < NUM_MATRICES; i++)
+    {
+        printf("[%s] Matriz %d \n", list[i] != NULL ? "USADA" : "LIVRE", i);
+    }
+    return;
+}
+
+int confirm_Matrix(char* question)
+{
+    int matrixId = -1;
+    printf("> %s: ", question);
+    scanf("%d", &matrixId);
+
+    if(matrixId < 0 || matrixId >= NUM_MATRICES)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Escolha invalida! \n");
+        return -1;
+    }
+    return matrixId;
+}
+
 
 Matrix* get_Matrix()
 {
@@ -71,15 +99,50 @@ void print_Matrix(Matrix *matrix)
     return;
 }
 
+int promt_Matrix(Matrix* source, char* message)
+{
+    char choice = ' ';
+    if(source != NULL)
+    {
+        print_Matrix(source);
+        printf("> %s [S/N]? ", message);
+        
+        // Loop to ignore '\n' left in stdin, breaks when user inputs a valid char 
+        do choice = getchar();
+        while(choice == '\n');
+
+        if(choice == 's' || choice == 'S') return 1;
+    }
+    return 0;
+}
+void get_MatrixNEW(Matrix ***list)
+{
+    int matrixId = -1;
+    
+    display_MatrixStates(*list);
+    matrixId = confirm_Matrix("Escolha qual das matrizes ocupar");
+    if(matrixId < 0) return;
+
+    if((*list)[matrixId] != NULL)
+    {
+        if(promt_Matrix((*list)[matrixId], "Deseja realmente substituir a matriz") == 0) return;
+    }
+    (*list)[matrixId] = get_Matrix();
+    return;
+}
+
+
 int main(int argc, char **argv)
 {
     char action, ignore;
     Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL, *Buffer = NULL;
 
-    Matrix *Matrices[10] = { NULL };
+    Matrix **Matrices = (Matrix**) calloc(NUM_MATRICES, sizeof(Matrix*));
+
     do
     {
         putchar('\n');
+        printf("<[I] Inserir Matriz \n");
         printf("<[Q] Inserir Matriz 1> \n");
         printf("<[A] Inserir Matriz 2> \n");
         printf("<[Z] Inserir Matriz Resultado Em> \n");
@@ -101,6 +164,10 @@ int main(int argc, char **argv)
 
         switch (action)
         {
+            case 'i':
+            case 'I':
+                get_MatrixNEW(&Matrices);
+                break;
             case 'q':
             case 'Q':
                 A_Matrix = free_Matrix(A_Matrix);
