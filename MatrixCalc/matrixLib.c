@@ -30,7 +30,7 @@ Matrix* free_Matrix(Matrix* freed)
 
 int isEmpty_Matrix(Matrix* source)
 {
-    return ((source != NULL) && source->matrix != NULL && source->Xsize * source->Ysize <= 0);
+    return ((source == NULL) || source->matrix == NULL || source->Xsize * source->Ysize <= 0);
 }
 
 int get_MatrixSize(Matrix* source)
@@ -61,7 +61,7 @@ double* get_MatrixElements(Matrix* source)
     }
     for(int i = 0; i < matrixSize; i++)
     {
-        elements[i] = source->matrix[i / source->Ysize][i % source->Xsize];
+        elements[i] = source->matrix[i / source->Xsize][i % source->Xsize];
     }
     return elements;
 }
@@ -99,18 +99,9 @@ Matrix* alloc_Matrix(int Xsize, int Ysize)
 
 int comp_Matrix(const Matrix *A, const Matrix *B)
 {
-    if(A == NULL || B == NULL)
-    {
-        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
-        printf("# Argumento matriz invalido! \n");
-        return 0;
-    }
-    if(A->Xsize != B->Xsize || A->Ysize != B->Ysize)
-    {
-        printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
-        printf("#Impossivel comparar tamanhos diferentes! \n");
-        return 0;
-    }
+    if(A == NULL || B == NULL) return 0;
+
+    if(A->Xsize != B->Xsize || A->Ysize != B->Ysize) return 0;
 
     for(int i = 0; i < A->Ysize; i++)
     {
@@ -440,7 +431,7 @@ Matrix *add_Matrix_Part(Matrix *main, Matrix *add, int atRow, int atCol, int unt
     return res;
 }
 
-Matrix* multiply_MatrixByN(Matrix* A)
+Matrix* multiply_MatrixByN(Matrix* A, double N)
 {
     if(A == NULL)
     {
@@ -461,10 +452,6 @@ Matrix* multiply_MatrixByN(Matrix* A)
         printf("ERROR: %s, %d \n", __FUNCTION__, __LINE__);
         return NULL;
     }
-
-    double N = 1.0;
-    printf("> Digite o numero pelo  qual multiplicar: ");
-    scanf("%lf", &N);
 
     for(int i = 0; i < res->Ysize; i++)
     {

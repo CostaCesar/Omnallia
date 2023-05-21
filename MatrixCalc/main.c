@@ -28,8 +28,18 @@ int confirm_Matrix(char* question)
     return matrixId;
 }
 
+Matrix *obtain_Matrix(Matrix **list)
+{
+    int matrixId = -1;
+    
+    display_MatrixStates(list);
+    matrixId = confirm_Matrix("Escolha a matriz a ser usada: ");
+    if(matrixId < 0) return NULL;
 
-Matrix* get_Matrix()
+    return list[matrixId];
+}
+
+Matrix* userFill_Matrix()
 {
     int x = 0, y = 0;
     printf("> Tamanho da matriz [Y X]: ");
@@ -105,7 +115,7 @@ int promt_Matrix(Matrix* source, char* message)
     if(source != NULL)
     {
         print_Matrix(source);
-        printf("> %s [S/N]? ", message);
+        printf("> %s [S/N] ", message);
         
         // Loop to ignore '\n' left in stdin, breaks when user inputs a valid char 
         do choice = getchar();
@@ -115,46 +125,196 @@ int promt_Matrix(Matrix* source, char* message)
     }
     return 0;
 }
-void get_MatrixNEW(Matrix ***list)
+void get_Matrix(Matrix ***list)
 {
     int matrixId = -1;
     
     display_MatrixStates(*list);
-    matrixId = confirm_Matrix("Escolha qual das matrizes ocupar");
+    matrixId = confirm_Matrix("Escolha qual das matrizes ocupar: ");
     if(matrixId < 0) return;
 
     if((*list)[matrixId] != NULL)
     {
-        if(promt_Matrix((*list)[matrixId], "Deseja realmente substituir a matriz") == 0) return;
+        if(promt_Matrix((*list)[matrixId], "Deseja realmente substituir a matriz?") == 0) return;
     }
-    (*list)[matrixId] = get_Matrix();
+    (*list)[matrixId] = free_Matrix((*list)[matrixId]);
+    (*list)[matrixId] = userFill_Matrix();
     return;
 }
 
+void view_Matrix(Matrix **list)
+{
+    int matrixId = -1;
+    
+    display_MatrixStates(list);
+    matrixId = confirm_Matrix("Escolha a matriz a ser visualizada: ");
+    if(matrixId < 0) return;
+
+    if(list[matrixId] != NULL)
+    {
+        print_Matrix(list[matrixId]);
+    }
+    else
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        printf("# Matriz vazia! \n");
+    }
+    return;
+}
+
+void insert_Matrix(Matrix ***list, Matrix *insert)
+{
+    if(insert == NULL) return;
+
+    int matrixId = -1;
+    
+    display_MatrixStates(*list);
+    matrixId = confirm_Matrix("Escolha a matriz a ser ocupada: ");
+    if(matrixId < 0) return;
+
+    if((*list)[matrixId] != NULL)
+    {
+        if(promt_Matrix((*list)[matrixId], "Deseja realmente substituir a matriz?") == 0) return;
+    }
+    (*list)[matrixId] = free_Matrix((*list)[matrixId]);
+    (*list)[matrixId] = insert;
+    printf("$ Matriz inserida com sucesso! \n");
+    return;
+}
+
+Matrix *oprt_MultiplyMatrices(Matrix **list)
+{
+    int confirm = 0;
+    Matrix *A, *B; 
+    do
+    {
+        A = obtain_Matrix(list);
+        if(A == NULL)
+        {
+            printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+            printf("# Matriz invalida! \n");
+            return NULL;
+        }
+        confirm = promt_Matrix(A, "Tem certeza dessa escolha?");
+    } while (confirm != 1);
+    do
+    {
+        B = obtain_Matrix(list);
+        if(B == NULL)
+        {
+            printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+            printf("# Matriz invalida! \n");
+            return NULL;
+        }
+        confirm = promt_Matrix(B, "Tem certeza dessa escolha?");
+    } while (confirm != 1);
+    
+    Matrix *res = multiply_Matrixes(A, B);
+    if(res == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+    print_Matrix(res);
+    return res;
+}
+
+Matrix *oprt_MultiplyMatrixByN(Matrix **list)
+{
+    int confirm = 0;
+    Matrix *A;
+    do
+    {
+        A = obtain_Matrix(list);
+        if(A == NULL)
+        {
+            printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+            printf("# Matriz invalida! \n");
+            return NULL;
+        }
+        confirm = promt_Matrix(A, "Tem certeza dessa escolha?");
+    } while (confirm != 1);
+
+    double n = 0;
+    printf("> Digite o numero para multiplicar a matriz por: ");
+    scanf("%lf", &n);
+
+    Matrix *res = multiply_MatrixByN(A, n);
+    if(res == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+    print_Matrix(res);
+    return res;
+}
+
+Matrix *oprt_Inverse_Matrix(Matrix **list)
+{
+    int confirm = 0;
+    Matrix *A;
+    do
+    {
+        A = obtain_Matrix(list);
+        if(A == NULL)
+        {
+            printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+            printf("# Matriz invalida! \n");
+            return NULL;
+        }
+        confirm = promt_Matrix(A, "Tem certeza dessa escolha?");
+    } while (confirm != 1);
+
+    Matrix *res = get_Inverse_Matrix(A);
+    if(res == NULL)
+    {
+        printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+    print_Matrix(res);
+    return res;
+}
+
+void oprt_Determinant(Matrix **list)
+{
+    int confirm = 0;
+    Matrix *A;
+    do
+    {
+        A = obtain_Matrix(list);
+        if(A == NULL)
+        {
+            printf("ERROR: %s, %d", __FUNCTION__, __LINE__);
+            printf("# Matriz invalida! \n");
+            return;
+        }
+        confirm = promt_Matrix(A, "Tem certeza dessa escolha?");
+    } while (confirm != 1);
+
+    double res = get_Determinant(A);
+    printf("$ Determinante da matriz: %lf", res);
+
+    return;
+}
 
 int main(int argc, char **argv)
 {
     char action, ignore;
-    Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL, *Buffer = NULL;
+    Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL;
 
     Matrix **Matrices = (Matrix**) calloc(NUM_MATRICES, sizeof(Matrix*));
 
     do
     {
         putchar('\n');
-        printf("<[I] Inserir Matriz \n");
-        printf("<[Q] Inserir Matriz 1> \n");
-        printf("<[A] Inserir Matriz 2> \n");
-        printf("<[Z] Inserir Matriz Resultado Em> \n");
-        printf("<[W] Ver Matriz 1> \n");
-        printf("<[S] Ver Matriz 2> \n");
-        printf("<[X] Ver Matriz Resultado> \n");
-        printf("<[O] Trocar Matriz 1 Por Matriz 2> \n");
-        printf("<[C] Multiplicar Matriz 1 X Numero N> \n");
-        printf("<[E] Multiplicar Matriz 1 x Matriz 2> \n");
-        printf("<[D] Multiplicar Matriz 2 x Matriz 1> \n");
-        printf("<[R] Obter Determinante Da Matriz 1> \n");
-        printf("<[T] Obter Matriz Inversa Da Matriz 1> \n");
+        printf("<[Q] Inserir Matriz \n");
+        printf("<[W] Ver Matriz \n");
+        printf("<[A] Inserir Ultimo Resultado> \n");
+        printf("<[S] Ver Ultimo Resultado> \n");
+        printf("<[C] Multiplicar Matriz x Numero> \n");
+        printf("<[E] Multiplicar Matriz x Matriz> \n");
+        printf("<[R] Obter Determinante> \n");
+        printf("<[T] Obter Matriz Inversa> \n");
         printf("<[P] Sair> \n");
         fflush(stdin);
         
@@ -164,93 +324,44 @@ int main(int argc, char **argv)
 
         switch (action)
         {
-            case 'i':
-            case 'I':
-                get_MatrixNEW(&Matrices);
+            case 'q': case 'Q':
+                get_Matrix(&Matrices);
                 break;
-            case 'q':
-            case 'Q':
-                A_Matrix = free_Matrix(A_Matrix);
-                A_Matrix = get_Matrix();
+            case 'w': case 'W':
+                view_Matrix(Matrices);
                 break;
-            case 'a':
-            case 'A':
-                B_Matrix = free_Matrix(B_Matrix);
-                B_Matrix = get_Matrix();
+            case 'a': case 'A':
+                insert_Matrix(&Matrices, LastRes_Matrix);
                 break;
-            case 'z':
-            case 'Z':
-                printf(">Inserir em [1] ou [2]: ");
-                scanf("%d", (int*)&action);
-                if(action == 1)
-                {
-                    A_Matrix = free_Matrix(A_Matrix);
-                    A_Matrix = clone_Matrix(LastRes_Matrix);
-                }
-                else if(action == 2)
-                {
-                    B_Matrix = free_Matrix(B_Matrix);
-                    B_Matrix = clone_Matrix(LastRes_Matrix);
-                }
-                else
-                {
-                    printf("# Numero da Matriz invalido! \n");
-                }
-                break;
-            case 'w':
-            case 'W':
-                print_Matrix(A_Matrix);
-                break;
-            case 's':
-            case 'S':
-                print_Matrix(B_Matrix);
-                break;
-            case 'x':
-            case 'X':
+            case 's': case 'S':
                 print_Matrix(LastRes_Matrix);
                 break;
-            case 'e':
-            case 'E':
-                RES_Matrix = multiply_Matrixes(A_Matrix, B_Matrix);
-                print_Matrix(RES_Matrix);
+            case 'c': case 'C':
+                RES_Matrix = oprt_MultiplyMatrixByN(Matrices);
                 break;
-            case 'd':
-            case 'D':
-                RES_Matrix = multiply_Matrixes(A_Matrix, B_Matrix);
-                print_Matrix(RES_Matrix);
+            case 'e': case 'E':
+                RES_Matrix = oprt_MultiplyMatrices(Matrices);
                 break;
-            case 'c':
-            case 'C':
-                RES_Matrix = multiply_MatrixByN(A_Matrix);
-                print_Matrix(RES_Matrix);
-                break;
-            case 't':
-            case 'T':
-                RES_Matrix = get_Inverse_Matrix(A_Matrix); 
-                print_Matrix(RES_Matrix);
+            case 't': case 'T':
+                RES_Matrix = oprt_Inverse_Matrix(Matrices);
                 break;
             case 'r':
             case 'R':
-                print_Matrix(A_Matrix);
-                printf("\n$ Determinante da matriz: %.5lf $ \n", get_Determinant(A_Matrix));
-                break;
-            case 'o':
-            case 'O':
-                Buffer = A_Matrix; A_Matrix = B_Matrix; B_Matrix = Buffer;
-                printf("\n$ Matrizes trocadas! $ \n");
+                oprt_Determinant(Matrices);
                 break;
             case 'p':
             case 'P':
-                RES_Matrix = free_Matrix(RES_Matrix);
-                A_Matrix = free_Matrix(A_Matrix);
-                B_Matrix = free_Matrix(B_Matrix);
+                for(int i = 0; i < NUM_MATRICES; i++)
+                    (void) free_Matrix(Matrices[i]);
+                (void) free_Matrix(RES_Matrix);
+                (void) free_Matrix(LastRes_Matrix);
                 printf("$ Saindo... \n");
                 return 0;
             default:
                 printf("$ Comando Invalido! \n");
                 break;
         }
-        if(isEmpty_Matrix(RES_Matrix))
+        if((!isEmpty_Matrix(RES_Matrix)) && !comp_Matrix(RES_Matrix, LastRes_Matrix))
         {
             LastRes_Matrix = free_Matrix(LastRes_Matrix);
             LastRes_Matrix = clone_Matrix(RES_Matrix);

@@ -20,7 +20,7 @@ double* get_MatrixElements(Matrix* source);
 Matrix* free_Matrix(Matrix* freed);
 Matrix* clone_Matrix(Matrix *source);
 Matrix* get_Inverse_Matrix(Matrix *A);
-Matrix* multiply_MatrixByN(Matrix* A);
+Matrix* multiply_MatrixByN(Matrix* A, double N);
 Matrix* extract_Row(Matrix* A, int row);
 Matrix* create_IdentityMatrix(Matrix *A);
 Matrix* alloc_Matrix(int Xsize, int Ysize);
