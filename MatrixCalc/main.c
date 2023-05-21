@@ -300,8 +300,7 @@ void oprt_Determinant(Matrix **list)
 int main(int argc, char **argv)
 {
     char action, ignore;
-    Matrix *A_Matrix = NULL, *B_Matrix = NULL, *RES_Matrix = NULL, *LastRes_Matrix = NULL;
-
+    Matrix *RES_Matrix = NULL, *LastRes_Matrix = NULL;
     Matrix **Matrices = (Matrix**) calloc(NUM_MATRICES, sizeof(Matrix*));
 
     do
